@@ -19,3 +19,17 @@ class CubeDomain:
             [self.center[2] - half, self.center[2] + half],
         ]
 
+
+from typing import List, Tuple
+
+
+class RectangularDomain:
+    """
+    General axis-aligned bounding box domain for tensor product rules.
+    """
+    def __init__(self, bounds: List[Tuple[float, float]]):
+        self._bounds = bounds
+
+    def bounds(self) -> List[Tuple[float, float]]:
+        return self._bounds
+

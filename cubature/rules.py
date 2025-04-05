@@ -2,6 +2,56 @@
 import numpy as np
 from typing import Tuple, List
 
+import numpy as np
+from typing import Callable, Tuple, List
+
+
+def midpoint_rule_1d(a: float, b: float, n: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Midpoint rule in 1D: n intervals between a and b.
+    Returns n points and equal weights.
+    """
+    h = (b - a) / n
+    points = np.linspace(a + h / 2, b - h / 2, n)
+    weights = np.full(n, h)
+    return points, weights
+
+
+class TensorProductRule:
+    """
+    General-purpose tensor product quadrature rule over rectangular domains.
+    """
+    def __init__(
+        self,
+        rule_1d: Callable[[float, float, int], Tuple[np.ndarray, np.ndarray]],
+        level: int = 2
+    ):
+        self.rule_1d = rule_1d
+        self.level = level
+
+    def generate(self, bounds: List[Tuple[float, float]]) -> Tuple[List[np.ndarray], List[float]]:
+        """
+        bounds: [(x_min, x_max), (y_min, y_max), (z_min, z_max), ...]
+        returns: list of d-D points and corresponding weights
+        """
+        dim = len(bounds)
+        points_per_dim = []
+        weights_per_dim = []
+
+        for (a, b) in bounds:
+            pts, wts = self.rule_1d(a, b, self.level)
+            points_per_dim.append(pts)
+            weights_per_dim.append(wts)
+
+        # Cartesian product
+        mesh = np.meshgrid(*points_per_dim, indexing='ij')
+        weight_mesh = np.meshgrid(*weights_per_dim, indexing='ij')
+
+        flat_points = np.stack([m.reshape(-1) for m in mesh], axis=1)
+        flat_weights = np.prod([w.reshape(-1) for w in weight_mesh], axis=0)
+
+        return list(flat_points), list(flat_weights)
+
 
 class SimpleCartesianRule:
     """
