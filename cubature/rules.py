@@ -11,30 +11,30 @@ class SimpleCartesianRule:
     def __init__(self, level: int = 2):
         self.level = level  # Number of points per dimension
 
-    def generate(self, domain) -> Tuple[List[np.ndarray], List[float]]:
-        """
-        Generate integration points and weights for the given CubeDomain.
-        """
+    def generate(self, domain):
         bounds = domain.bounds()  # [[xmin, xmax], [ymin, ymax], [zmin, zmax]]
-        grids = []
+        levels = self.level
+
+        # Compute 1D midpoints and step size in each dimension
+        points_1d = []
+        step_sizes = []
+
+        for dim in bounds:
+            start, end = dim
+            step = (end - start) / levels
+            step_sizes.append(step)
+            midpoints = np.linspace(start + step / 2, end - step / 2, levels)
+            points_1d.append(midpoints)
+
+        # Cartesian product of points and volume weights
+        points = []
         weights = []
 
-        for b in bounds:
-            pts, wts = np.linspace(b[0], b[1], self.level, retstep=True)
-            grids.append(pts)
-            weights.append(np.full(self.level, wts))
-
-        # Cartesian product of points
-        points = []
-        point_weights = []
-        for i in range(self.level):
-            for j in range(self.level):
-                for k in range(self.level):
-                    x = grids[0][i]
-                    y = grids[1][j]
-                    z = grids[2][k]
+        for x in points_1d[0]:
+            for y in points_1d[1]:
+                for z in points_1d[2]:
                     points.append(np.array([x, y, z]))
-                    point_weights.append(weights[0][i] * weights[1][j] * weights[2][k])
+                    weights.append(step_sizes[0] * step_sizes[1] * step_sizes[2])
 
-        return points, point_weights
+        return points, weights
 
