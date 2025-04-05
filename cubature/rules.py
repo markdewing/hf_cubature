@@ -16,6 +16,17 @@ def midpoint_rule_1d(a: float, b: float, n: int) -> Tuple[np.ndarray, np.ndarray
     weights = np.full(n, h)
     return points, weights
 
+def gauss_legendre_rule_1d(a: float, b: float, n: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Gauss-Legendre quadrature rule on [a, b] using n points.
+    Transforms from [-1, 1] to [a, b].
+    """
+    xi, wi = np.polynomial.legendre.leggauss(n)
+    # Map from [-1, 1] to [a, b]
+    x_mapped = 0.5 * (b - a) * xi + 0.5 * (b + a)
+    w_mapped = 0.5 * (b - a) * wi
+    return x_mapped, w_mapped
+
 
 class TensorProductRule:
     """
