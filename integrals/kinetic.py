@@ -23,19 +23,7 @@ def compute_kinetic(f, g, level=8):
 
         x = domain.transform(point)
         w = weight * domain.weight(point)
-        value += w * f(x) * laplacian(g, x)  # only apply Laplacian to g
+        value += w * f(x) * g.laplacian(x)  # only apply Laplacian to g
 
     return -0.5 * value
-
-
-def laplacian(f, x):
-    """
-    Compute the Laplacian of a scalar function f at point x.
-    Assumes that f is a Gaussian basis function.
-    """
-    # Laplacian of Gaussian φ(r) = exp(-α r^2):
-    # ∇² φ = (4α² r² - 6α) φ
-    alpha = f.alpha
-    r = np.linalg.norm(x - f.center)
-    return (4 * alpha**2 * r**2 - 6 * alpha) * f(x)
 

@@ -24,4 +24,11 @@ class GaussianBasis:
         diff = r - self.center
         return self.norm_const * np.exp(-self.alpha * np.dot(diff, diff))
 
+    def laplacian(self, x):
+        """Compute ∇²φ(x) for the Gaussian basis function."""
+        # ∇² φ = (4α² r² - 6α) φ
+        r_vec = np.array(x) - self.center
+        r2 = np.dot(r_vec, r_vec)
+        a = self.alpha
+        return (4 * a**2 * r2 - 6 * a) * self(x)
 
