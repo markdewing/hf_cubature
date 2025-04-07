@@ -39,9 +39,9 @@ class InfiniteDomainTransform:
     """
     Maps [-1, 1]^n to ℝ^n using x = tan(πu/2), for Gaussians on infinite domains.
     """
-    def __init__(self, dim):
+    def __init__(self, dim, shift=0.0):
         self.dim = dim
-        self.domain = CubeDomain([0.0, 0.0, 0.0], 2.0)
+        self.domain = CubeDomain([0.0+shift, 0.0+shift, 0.0+shift], 2.0)
 
     def bounds(self):
         return self.domain.bounds()
