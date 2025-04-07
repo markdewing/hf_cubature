@@ -27,6 +27,14 @@ def gauss_legendre_rule_1d(a: float, b: float, n: int) -> Tuple[np.ndarray, np.n
     w_mapped = 0.5 * (b - a) * wi
     return x_mapped, w_mapped
 
+def gauss_laguerre_rule_1d(n: int) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Gauss-Laguerre quadrature rule on [0, ∞) using n points.
+    This integrates functions with weight e^{-x}.
+    """
+    xi, wi = np.polynomial.laguerre.laggauss(n)
+    return xi, wi
+
 
 class TensorProductRule:
     """

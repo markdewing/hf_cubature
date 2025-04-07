@@ -10,13 +10,13 @@ def test_eri():
     center3 = [0.0, 1.0, 0.0]  # Center for φλ
     center4 = [0.0, 0.0, 1.0]  # Center for φσ
 
-    result = compute_eri(alpha, center1, center2, center3, center4, level=10)
+    result = compute_eri(alpha, center1, center2, center3, center4, level=16)
     #result = compute_eri_laplace(alpha, center1, center2, center3, center4, level=6, s_level=8)
 
     # This is a placeholder for the expected value
-    expected = 0.3  # This is a placeholder and should be replaced with a calculated or known reference value.
+    expected = 0.33  # This is a placeholder and should be replaced with a calculated or known reference value.
 
-    assert np.isclose(result, expected, rtol=.5), f"Expected {expected}, but got {result}"
+    assert np.isclose(result, expected, rtol=1e-2), f"Expected {expected}, but got {result}"
 
 
 if __name__ == "__main__":
