@@ -28,12 +28,7 @@ def eri_integrand(r1, r2, alpha, basis1, basis2, basis3, basis4):
     return phi_mu * phi_nu * phi_lambda * phi_sigma * coulomb
 
 # Compute the ERI using custom cubature integration
-def compute_eri_slow(alpha, center1, center2, center3, center4, level=8):
-    # Define the basis functions
-    basis1 = GaussianBasis(center=center1, alpha=alpha)
-    basis2 = GaussianBasis(center=center2, alpha=alpha)
-    basis3 = GaussianBasis(center=center3, alpha=alpha)
-    basis4 = GaussianBasis(center=center4, alpha=alpha)
+def compute_eri_slow(basis1, basis2, basis3, basis4, level=8):
 
     # Set up the domain and cubature rule
     domain = InfiniteDomainTransform(dim=3)
@@ -72,7 +67,7 @@ def laplace_coulomb_potential(r1, r2, s):
     return 2 * np.exp(-s*s * distance*distance)/np.sqrt(np.pi)
 
 # ERI integrand using Gaussian basis functions
-def laplace_eri_integrand(r1, r2, alpha, basis1, basis2, basis3, basis4, s):
+def laplace_eri_integrand(r1, r2, basis1, basis2, basis3, basis4, s):
     phi_mu = basis1(r1)
     phi_nu = basis2(r2)
     phi_lambda = basis3(r1)
@@ -83,12 +78,7 @@ def laplace_eri_integrand(r1, r2, alpha, basis1, basis2, basis3, basis4, s):
     return phi_mu * phi_nu * phi_lambda * phi_sigma * laplace_coulomb
 
 # Compute the ERI using custom cubature integration and Laplace transform
-def compute_eri_laplace_slow(alpha, center1, center2, center3, center4, level=8, s_min=0.001, s_max=100.0, s_level=8):
-    # Define the basis functions
-    basis1 = GaussianBasis(center=center1, alpha=alpha)
-    basis2 = GaussianBasis(center=center2, alpha=alpha)
-    basis3 = GaussianBasis(center=center3, alpha=alpha)
-    basis4 = GaussianBasis(center=center4, alpha=alpha)
+def compute_eri_laplace_slow(basis1, basis2, basis3, basis4, level=8, s_min=0.001, s_max=100.0, s_level=8):
 
     # Set up the domain and cubature rule for r1, r2 (electron positions)
     domain = InfiniteDomainTransform(dim=3)
@@ -170,13 +160,8 @@ def compute_eri(phi_mu, phi_nu, phi_lambda, phi_sigma, level=8):
 
     return value
 
-def compute_eri_laplace(alpha, center1, center2, center3, center4, level=8, s_level=12):
+def compute_eri_laplace(phi_mu, phi_nu, phi_lambda, phi_sigma, level=8, s_level=12):
     u_level = s_level
-    # Basis functions
-    phi_mu = GaussianBasis(center1, alpha)
-    phi_nu = GaussianBasis(center2, alpha)
-    phi_lambda = GaussianBasis(center3, alpha)
-    phi_sigma = GaussianBasis(center4, alpha)
 
     # Generate cubature for spatial variables (r1 and r2)
     space_rule = TensorProductRule(rule_1d=gauss_legendre_rule_1d, level=level)

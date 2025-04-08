@@ -19,6 +19,12 @@ def plot_eri_convergence_direct():
     center3 = [0.0, 1.0, 0.0]  # Center for φλ
     center4 = [0.0, 0.0, 1.0]  # Center for φσ
 
+    phi_mu = GaussianBasis(center1, alpha)
+    phi_nu = GaussianBasis(center2, alpha)
+    phi_lambda = GaussianBasis(center3, alpha)
+    phi_sigma = GaussianBasis(center4, alpha)
+
+
     levels = list(range(4, 30,4))  # Cubature levels to test
     eri_values = []
 
@@ -26,7 +32,7 @@ def plot_eri_convergence_direct():
         #print(f"Computing ERI at level {level}...")
 
         start = perf_counter()
-        value = compute_eri(alpha, center1, center2, center3, center4, level=level)
+        value = compute_eri(phi_mu, phi_nu, phi_lambda, phi_sigma, level=level)
         end = perf_counter()
         elapsed = end-start
         print(level, value, elapsed, flush=True)
@@ -53,6 +59,11 @@ def plot_eri_convergence_laplace():
     center3 = [0.0, 1.0, 0.0]  # Center for φλ
     center4 = [0.0, 0.0, 1.0]  # Center for φσ
 
+    phi_mu = GaussianBasis(center1, alpha)
+    phi_nu = GaussianBasis(center2, alpha)
+    phi_lambda = GaussianBasis(center3, alpha)
+    phi_sigma = GaussianBasis(center4, alpha)
+
 
     # Plotting value vs s (or u) seems to be linear, with no sign of convergence
     #  Need to refine all levels at the same time to see convergence
@@ -73,7 +84,7 @@ def plot_eri_convergence_laplace():
         start = perf_counter()
         #eri_value = compute_eri_laplace(alpha, center1, center2, center3, center4, level=6, s_min=0.001, s_max=100.0, s_level=s_level)
         #eri_value2 = compute_eri_laplace_slow(alpha, center1, center2, center3, center4, level=level, s_min=0.0001, s_max=10000.0, s_level=s_level)
-        eri_value = compute_eri_laplace(alpha, center1, center2, center3, center4, level=level, s_level=s_level)
+        eri_value = compute_eri_laplace(ph_mu, phi_nu, phi_lambda, phi_sigma, level=level, s_level=s_level)
         #eri_value2 = compute_eri_laplace_slow(alpha, center1, center2, center3, center4, level=level, s_level=s_level)
         end = perf_counter()
         elapsed = end-start
