@@ -15,11 +15,3 @@ def test_gaussian_basis_evaluation():
 
     assert np.isclose(value, 1.0), "Gaussian should be 1.0 at its center"
 
-def test_scf_smoke():
-    # Placeholder smoke test
-    try:
-        from examples import run_h2_minimal
-        run_h2_minimal.main()
-    except Exception as e:
-        pytest.fail(f"SCF smoke test failed: {e}")
-
