@@ -10,7 +10,12 @@ def test_eri():
     center3 = [0.0, 1.0, 0.0]  # Center for φλ
     center4 = [0.0, 0.0, 1.0]  # Center for φσ
 
-    result = compute_eri(alpha, center1, center2, center3, center4, level=16)
+    phi_mu = GaussianBasis(center1, alpha)
+    phi_nu = GaussianBasis(center2, alpha)
+    phi_lambda = GaussianBasis(center3, alpha)
+    phi_sigma = GaussianBasis(center4, alpha)
+
+    result = compute_eri(phi_mu, phi_nu, phi_lambda, phi_sigma, level=16)
     #result = compute_eri_laplace(alpha, center1, center2, center3, center4, level=6, s_level=8)
 
     # This is a placeholder for the expected value

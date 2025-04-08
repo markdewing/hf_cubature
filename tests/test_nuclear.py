@@ -33,3 +33,35 @@ def test_nuclear_attraction_offset_nucleus():
     expected = -0.8427004451318929
     assert np.isclose(result, expected, rtol=1e-3), f"Expected {expected}, got {result}"
 
+def test_h2_nuclear_ondiag():
+    # H atoms at ±0.7 bohr
+    center1 = np.array([-0.7, 0.0, 0.0])
+    center2 = np.array([ 0.7, 0.0, 0.0])
+    alpha = 1.0  # same as before
+
+    g1 = GaussianBasis(center=center1, alpha=alpha)
+
+    level = 20
+    val = compute_nuclear_attraction(g1, g1, nucleus_position=center1, Z=1, level=level)
+    val +=  compute_nuclear_attraction(g1, g1, nucleus_position=center2, Z=1, level=level)
+    expected = -2.306405 # From PySCF
+
+    assert np.isclose(val, expected, rtol=1e-2), f"Expected {expected}, got {val}"
+
+
+def test_h2_nuclear_offdiag():
+    # H atoms at ±0.7 bohr
+    center1 = np.array([-0.7, 0.0, 0.0])
+    center2 = np.array([ 0.7, 0.0, 0.0])
+    alpha = 1.0  # same as before
+
+    g1 = GaussianBasis(center=center1, alpha=alpha)
+    g2 = GaussianBasis(center=center2, alpha=alpha)
+
+    level = 20
+    val = compute_nuclear_attraction(g1, g2, nucleus_position=center1, Z=1, level=level)
+    val += compute_nuclear_attraction(g1, g2, nucleus_position=center2, Z=1, level=level)
+    expected = -0.899124 # From PySCF
+
+    assert np.isclose(val, expected, rtol=1e-2), f"Expected {expected}, got {val}"
+

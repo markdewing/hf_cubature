@@ -24,6 +24,22 @@ def test_overlap_with_infinite_transform():
     assert np.isclose(val, expected, rtol=1e-3), f"Expected {expected}, got {val}"
 
 
+def test_h2_overlap_offdiag():
+    # H atoms at ±0.7 bohr
+    center1 = np.array([-0.7, 0.0, 0.0])
+    center2 = np.array([ 0.7, 0.0, 0.0])
+    alpha = 1.0  # same as before
+
+    g1 = GaussianBasis(center=center1, alpha=alpha)
+    g2 = GaussianBasis(center=center2, alpha=alpha)
+
+    val = compute_overlap(g1, g2, level=16)
+    expected = 0.375311 # From PySCF
+
+    assert np.isclose(val, expected, rtol=1e-3), f"Expected {expected}, got {val}"
+
+
+
 
 #def test_gaussian_overlap_different_centers():
 #    a = GaussianBasis(center=[0, 0, 0], alpha=0.5)

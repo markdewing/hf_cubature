@@ -120,13 +120,7 @@ def compute_eri_laplace_slow(alpha, center1, center2, center3, center4, level=8,
 
     return value
 
-def compute_eri(alpha, center1, center2, center3, center4, level=8):
-    # Set up basis functions
-    phi_mu = GaussianBasis(center1, alpha)
-    phi_nu = GaussianBasis(center2, alpha)
-    phi_lambda = GaussianBasis(center3, alpha)
-    phi_sigma = GaussianBasis(center4, alpha)
-
+def compute_eri(phi_mu, phi_nu, phi_lambda, phi_sigma, level=8):
     # Cubature for r1 and r2
     rule = TensorProductRule(rule_1d=gauss_legendre_rule_1d, level=level)
     domain = InfiniteDomainTransform(dim=3)
