@@ -32,3 +32,21 @@ class GaussianBasis:
         a = self.alpha
         return (4 * a**2 * r2 - 6 * a) * self(x)
 
+class ContractedGaussian:
+    """
+    A contracted Gaussian basis function:
+        Φ(r) = Σ_i c_i * φ_i(r)
+    where each φ_i is a normalized GaussianBasis.
+    """
+    def __init__(self, center: np.ndarray, alphas: list, coeffs: list):
+        assert len(alphas) == len(coeffs), "Mismatch in number of exponents and coefficients"
+        self.center = np.array(center, dtype=float)
+        self.components = [GaussianBasis(center, alpha) for alpha in alphas]
+        self.coeffs = np.array(coeffs, dtype=float)
+
+    def __call__(self, r: np.ndarray) -> float:
+        return sum(c * g(r) for c, g in zip(self.coeffs, self.components))
+
+    def laplacian(self, r: np.ndarray) -> float:
+        return sum(c * g.laplacian(r) for c, g in zip(self.coeffs, self.components))
+
