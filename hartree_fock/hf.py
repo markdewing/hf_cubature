@@ -6,21 +6,6 @@ from integrals.eri import compute_eri
 from basis.gaussian import GaussianBasis
 
 
-def nuclear_repulsion_energy(molecule):
-    energy = 0.0
-    for i in range(len(molecule)):
-        for j in range(i + 1, len(molecule)):
-            m1 = molecule[i]
-            m2 = molecule[j]
-            R1 = m1["position"]
-            R2 = m2["position"]
-            Z1 = m1["Z"]
-            Z2 = m2["Z"]
-            distance = np.linalg.norm(np.array(R1) - np.array(R2))
-            energy += Z1 * Z2 / distance
-    return energy
-
-
 def build_density_matrix(C, n_electrons):
     n_occ = n_electrons // 2
     print("building density matrix")
@@ -42,9 +27,9 @@ def build_fock_matrix(H, ERI, D):
 
 def scf_loop(basis_set, molecule, level=8, max_iter=50, conv_thresh=1e-6):
     n_basis = len(basis_set)
-    n_electrons = sum(atom["Z"] for atom in molecule)
+    n_electrons = sum(atom.Z for atom in molecule.atoms)
 
-    E_nuc = nuclear_repulsion_energy(molecule)
+    E_nuc = molecule.nuclear_repulsion_energy()
     print("E_nuc", E_nuc)
 
     # Build one-electron integrals
@@ -57,9 +42,9 @@ def scf_loop(basis_set, molecule, level=8, max_iter=50, conv_thresh=1e-6):
     )
 
     V = np.zeros((n_basis, n_basis))
-    for atom in molecule:
-        Z = atom["Z"]
-        center = atom["position"]
+    for atom in molecule.atoms:
+        Z = atom.Z
+        center = atom.position
         for i, bi in enumerate(basis_set):
             for j, bj in enumerate(basis_set):
                 V[i, j] += compute_nuclear_attraction(bi, bj, center, Z, level=20)
