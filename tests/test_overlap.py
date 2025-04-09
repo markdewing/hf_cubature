@@ -1,6 +1,6 @@
 
 import numpy as np
-from basis import GaussianBasis
+from basis import GaussianBasis, ContractedGaussian
 from integrals.overlap import compute_overlap, compute_overlap_finite_domain
 from cubature.domains import RectangularDomain
 
@@ -38,6 +38,31 @@ def test_h2_overlap_offdiag():
 
     assert np.isclose(val, expected, rtol=1e-3), f"Expected {expected}, got {val}"
 
+
+def test_Be_s():
+       # STO-3G exponents and coefficients for Be
+    # Two s-type contracted Gaussians and one p-type contracted Gaussian
+
+    # S-type contracted functions
+    alphas_s1 = [30.16787069, 5.495115306, 1.487192653]
+    coeffs_s1 = [0.1543289673, 0.5353281423, 0.4446345422]
+
+    alphas_s2 = [1.314833110, 0.3055389383, 0.09937074560]
+    coeffs_s2 = [-0.09996722919, 0.3995128261, 0.7001154689]
+
+    # P-type contracted function (uses same exponents as second s)
+    alphas_p = [1.314833110, 0.3055389383, 0.09937074560]
+    coeffs_p = [0.1559162750, 0.6076837186, 0.3919573931]
+
+    center = [0.0, 0.0, 0.0]
+
+    s1 = ContractedGaussian(center=center, alphas=alphas_s1, coeffs=coeffs_s1)
+    s2 = ContractedGaussian(center=center, alphas=alphas_s2, coeffs=coeffs_s2)
+
+    val = compute_overlap(s1, s2, level=20)
+    expected = 0.259517 # From PySCF
+
+    assert np.isclose(val, expected, rtol=1e-3), f"Expected {expected}, got {val}"
 
 
 
