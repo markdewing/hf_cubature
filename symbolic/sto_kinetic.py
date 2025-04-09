@@ -1,5 +1,6 @@
 import sympy as sp
 from scipy.integrate import nquad
+from math import factorial
 
 # Define variables
 x, y, z = sp.symbols("x y z")
@@ -9,11 +10,12 @@ eps = 1e-10
 r = sp.sqrt(r2 + eps)
 
 
-def sto(alpha):
+def sto(alpha,n=1):
     """Return a normalized STO function φ(r) = N * exp(-α r^2)"""
     # norm = (2 * alpha / sp.pi) ** (3 / 4)
-    norm = sp.sqrt(alpha ** 3 / sp.pi)
-    return norm * sp.exp(-alpha * r)
+    #norm = sp.sqrt(alpha ** 3 / sp.pi)
+    norm = sp.sqrt((2 * alpha) ** (2 * n + 1) / (4 * sp.pi * sp.factorial(2 * n)))
+    return norm * r**(n-1)*sp.exp(-alpha * r)
 
 
 def contracted_sto(alphas, coeffs):
@@ -52,8 +54,10 @@ coeffs = [0.3, 0.5, 0.2]  # example coefficients
 # Define contracted STOs
 # phiA = contracted_sto(alphas, coeffs)
 # phiB = contracted_sto(alphas, coeffs)
-phiA = sto(1.24)
-phiB = sto(1.24)
+#n = 1
+n = 2
+phiA = sto(1.24,n=n)
+phiB = sto(1.24,n=n)
 
 # Compute kinetic energy integral
 T = kinetic_energy_integral(phiA, phiB)

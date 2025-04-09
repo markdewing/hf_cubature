@@ -6,19 +6,21 @@ x, y, z = sp.symbols("x y z")
 r = sp.Matrix([x, y, z])
 
 # Define the Slater Type Orbital (STO) function
-def STO(alpha, r_vec):
+def STO(alpha, r_vec, n=1):
     """
     Returns the symbolic STO function with exponent alpha
     :param alpha: exponent of the STO
     :param r_vec: 3D vector position (x, y, z) :return: symbolic STO function
     """
-    norm_const = sp.sqrt(alpha ** 3 / sp.pi)
+    #norm_const = sp.sqrt(alpha ** 3 / sp.pi)
+    norm_const = sp.sqrt((2 * alpha) ** (2 * n + 1) / (4 * sp.pi * sp.factorial(2 * n)))
+
     r = sp.sqrt(r_vec.dot(r_vec))
-    return norm_const * sp.exp(-alpha * r)
+    return norm_const * r**(n-1) * sp.exp(-alpha * r)
 
 
 # Define the Contracted STO function
-def contracted_STO(alphas, coeffs, r_vec):
+def contracted_STO(alphas, coeffs, r_vec, n=1):
     """
     Returns the symbolic contracted STO function as a linear combination of STOs
     :param alphas: list of exponents for the STOs
@@ -28,7 +30,7 @@ def contracted_STO(alphas, coeffs, r_vec):
     """
     result = 0
     for alpha, coeff in zip(alphas, coeffs):
-        result += coeff * STO(alpha, r_vec)
+        result += coeff * STO(alpha, r_vec, n)
     return result
 
 
@@ -60,9 +62,10 @@ coeffs = [0.3, 0.5, 0.2]  # example coefficients
 # Define the center of the orbital (use [0, 0, 0] for simplicity)
 center = sp.Matrix([x, y, z])
 
+n = 2
 # Compute the contracted STO on the same center (same for both)
-contracted_sto1 = contracted_STO(alphas, coeffs, center)
-contracted_sto2 = contracted_STO(alphas, coeffs, center)
+contracted_sto1 = contracted_STO(alphas, coeffs, center, n)
+contracted_sto2 = contracted_STO(alphas, coeffs, center, n)
 
 # Compute the overlap integral between the two contracted STOs
 overlap_value = overlap_integral(contracted_sto1, contracted_sto2)

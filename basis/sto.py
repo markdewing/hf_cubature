@@ -1,14 +1,17 @@
 import numpy as np
+from math import factorial
+from typing import Optional
 
 
 class STO:
-    def __init__(self, center: np.ndarray, alpha: float, normalize: bool = True):
+    def __init__(self, center: np.ndarray, alpha: float, n:int = 1, normalize: bool = True):
         self.center = np.array(center, dtype=float)
         self.alpha = alpha
+        self.n = n
 
         # If normalize is True, compute the normalization constant
         if normalize:
-            self.norm_const = np.sqrt(alpha ** 3 / np.pi)
+            self.norm_const = np.sqrt((2 * alpha) ** (2 * n + 1) / (4 * np.pi * factorial(2 * n)))
         else:
             self.norm_const = 1.0
 
@@ -16,14 +19,16 @@ class STO:
         r = np.array(r, dtype=float)
         diff = r - self.center
         r = np.sqrt(np.dot(diff, diff))
-        return self.norm_const * np.exp(-self.alpha * r)
+        return self.norm_const * r**(self.n-1) * np.exp(-self.alpha * r)
 
     def laplacian(self, x):
         """Compute ∇²φ(x) for the STO."""
         r_vec = np.array(x) - self.center
         r = np.sqrt(np.dot(r_vec, r_vec))
         a = self.alpha
-        return (a * a - 2 * a / r) * self.norm_const * np.exp(-self.alpha * r)
+        n = self.n
+        pre = r**(n-3) * (n *(n-1) - r*a*(2*n - r*a))
+        return pre*self.norm_const * np.exp(-self.alpha * r)
 
 
 class ContractedSTO:
@@ -34,13 +39,16 @@ class ContractedSTO:
     """
 
     def __init__(
-        self, center: np.ndarray, alphas: list, coeffs: list, normalize: bool = True
+            self, center: np.ndarray, alphas: list, coeffs: list, order : Optional[list] = None, normalize: bool = True
     ):
         assert len(alphas) == len(
             coeffs
         ), "Mismatch in number of exponents and coefficients"
         self.center = np.array(center, dtype=float)
-        self.components = [STO(center, alpha, normalize) for alpha in alphas]
+        if order is None:
+            order = [1]*len(alphas)
+
+        self.components = [STO(center, alpha, n=n,normalize=normalize) for alpha,n in zip(alphas,order)]
         self.coeffs = np.array(coeffs, dtype=float)
 
     def __call__(self, r: np.ndarray) -> float:

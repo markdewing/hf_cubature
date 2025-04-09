@@ -68,6 +68,23 @@ def test_overlap_integral_same_center():
     ), f"Expected {expected_contracted_sto_overlap}, got {overlap_contracted_sto}"
 
 
+    # Test n=2
+    contracted_sto2 = ContractedSTO(center, alphas, coeffs, order=[2,2,2])
+
+    # Compute the overlap integral (same contracted STO on the same center)
+    overlap_contracted_sto2 = compute_overlap(contracted_sto2, contracted_sto2, level=16)
+    print(
+        f"Overlap integral for Contracted STO on same center: {overlap_contracted_sto2}"
+    )
+
+    # Expected value for the overlap integral between the same contracted STO on the same center
+    # From symbolic/sto.py
+    expected_contracted_sto_overlap2 = 0.84158
+    assert np.isclose(
+        overlap_contracted_sto2, expected_contracted_sto_overlap2, atol=1e-3
+    ), f"Expected {expected_contracted_sto_overlap2}, got {overlap_contracted_sto2}"
+
+
 def test_kinetic_sto_same_center():
     # Use ζ = 1.24, common for hydrogen 1s STOs
     zeta = 1.24
@@ -79,11 +96,18 @@ def test_kinetic_sto_same_center():
     # Compute kinetic energy integral T = ⟨φ| -½∇² |φ⟩
     T = compute_kinetic(sto, sto, level=20)
 
-    # value from symbolic/sto.py is 0.7688
+    # value from symbolic/sto_kinetic.py is 0.7688
     # Use approximate value for level 20 instead (to keep test time under control)
     expected = 0.735249  # Approx value for ζ = 1.24
 
     assert np.isclose(T, expected, atol=1e-3), f"Expected {expected}, got {T}"
+
+    # Test n=2
+    sto2 = STO(center, zeta,n=2)
+    T2 = compute_kinetic(sto2, sto2, level=20)
+    # From symbolic/sto_kinetic.py.  Converges much more quickly than the n=1 value.
+    expected2 = 0.256266
+    assert np.isclose(T2, expected2, atol=1e-3), f"Expected {expected2}, got {T2}"
 
 
 if __name__ == "__main__":

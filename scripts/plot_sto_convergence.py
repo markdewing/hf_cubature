@@ -21,7 +21,9 @@ def compute_integrals(levels):
     center = [0.0, 0.0, 0.0]
 
     # Create STO basis function
-    sto = STO(center, zeta)
+    n = 1
+    #n = 2
+    sto = STO(center, zeta, n = n)
 
     Z = 1
     ref_ke = 0.76879
