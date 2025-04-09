@@ -1,9 +1,42 @@
 import numpy as np
+from itertools import product
 from integrals.overlap import compute_overlap
 from integrals.kinetic import compute_kinetic
 from integrals.nuclear import compute_nuclear_attraction
 from integrals.eri import compute_eri
 from basis.gaussian import GaussianBasis
+
+def unique_eri_indices(n):
+    """Generate only unique (μν|λσ) indices using 8-fold symmetry"""
+    indices = []
+    for mu in range(n):
+        for nu in range(mu + 1):
+            for lam in range(n):
+                for sig in range(lam + 1):
+                    # Ensure (μν) ≤ (λσ) in lexicographic order
+                    if mu * n + nu >= lam * n + sig:
+                        indices.append((mu, nu, lam, sig))
+    return indices
+
+def build_eri_tensor(basis_set, level=16):
+    n_basis = len(basis_set)
+    ERI = np.zeros((n_basis, n_basis, n_basis, n_basis))
+
+    indices = unique_eri_indices(n_basis)
+    #print('indices',indices)
+    #for mu, nu, lam, sig in unique_eri_indices(n_basis):
+    for mu, nu, lam, sig in unique_eri_indices(n_basis):
+        val = compute_eri(basis_set[mu], basis_set[nu], basis_set[lam], basis_set[sig], level=level)
+        #print('ERI',mu,nu,lam,sig,val)
+
+        # Fill all symmetric equivalents
+        for i, j in [(mu, nu), (nu, mu)]:
+            for k, l in [(lam, sig), (sig, lam)]:
+                ERI[i, j, k, l] = val
+                ERI[k, l, i, j] = val  # (λσ|μν)
+
+    return ERI
+
 
 
 def build_density_matrix(C, n_electrons):
@@ -51,21 +84,7 @@ def scf_loop(basis_set, molecule, level=8, max_iter=50, conv_thresh=1e-6):
 
     H_core = T + V
 
-    # Build ERIs
-    ERI = np.zeros((n_basis, n_basis, n_basis, n_basis))
-    eri_level = 16
-    for mu in range(n_basis):
-        for nu in range(n_basis):
-            for lam in range(n_basis):
-                for sig in range(n_basis):
-                    ERI[mu, nu, lam, sig] = compute_eri(
-                        basis_set[mu],
-                        basis_set[nu],
-                        basis_set[lam],
-                        basis_set[sig],
-                        level=eri_level,
-                    )
-                    # print(mu,nu,lam,sig,ERI[mu,nu,lam,sig])
+    ERI = build_eri_tensor(basis_set, level=16)
 
     print("ERI")
     print("(00|00)", ERI[0, 0, 0, 0])
