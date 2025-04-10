@@ -22,12 +22,18 @@ def build_eri_tensor(basis_set, level=16):
     n_basis = len(basis_set)
     ERI = np.zeros((n_basis, n_basis, n_basis, n_basis))
 
+    tol = 1e-10
     indices = unique_eri_indices(n_basis)
     #print('indices',indices)
     #for mu, nu, lam, sig in unique_eri_indices(n_basis):
     for mu, nu, lam, sig in unique_eri_indices(n_basis):
+        if basis_set[mu].check_2e_zero(basis_set[nu], basis_set[lam],basis_set[sig]):
+            continue
+
         val = compute_eri(basis_set[mu], basis_set[nu], basis_set[lam], basis_set[sig], level=level)
-        #print('ERI',mu,nu,lam,sig,val)
+        if abs(val) < tol:
+            val = 0.0
+        #print('ERI',mu,nu,lam,sig,val,flush=True)
 
         # Fill all symmetric equivalents
         for i, j in [(mu, nu), (nu, mu)]:
@@ -36,7 +42,6 @@ def build_eri_tensor(basis_set, level=16):
                 ERI[k, l, i, j] = val  # (λσ|μν)
 
     return ERI
-
 
 
 def build_density_matrix(C, n_electrons):
@@ -66,13 +71,23 @@ def scf_loop(basis_set, molecule, level=8, max_iter=50, conv_thresh=1e-6):
     print("E_nuc", E_nuc)
 
     # Build one-electron integrals
-    S = np.array(
-        [[compute_overlap(b1, b2, level=22) for b2 in basis_set] for b1 in basis_set]
-    )
+    S = np.zeros((n_basis, n_basis))
+    for i,b1 in enumerate(basis_set):
+        for j,b2 in enumerate(basis_set):
+            if b1.check_1e_zero(b2):
+                continue
+            S[i,j] = compute_overlap(b1, b2, level=22)
+
+    print('S')
+    S[np.abs(S) < 1e-10] = 0.0
+    print(S)
 
     T = np.array(
         [[compute_kinetic(b1, b2, level=20) for b2 in basis_set] for b1 in basis_set]
     )
+    print('T')
+    T[np.abs(T) < 1e-10] = 0.0
+    print(T)
 
     V = np.zeros((n_basis, n_basis))
     for atom in molecule.atoms:
@@ -82,6 +97,9 @@ def scf_loop(basis_set, molecule, level=8, max_iter=50, conv_thresh=1e-6):
             for j, bj in enumerate(basis_set):
                 V[i, j] += compute_nuclear_attraction(bi, bj, center, Z, level=20)
 
+    print('V')
+    V[np.abs(V) < 1e-10] = 0.0
+    print(V)
     H_core = T + V
 
     ERI = build_eri_tensor(basis_set, level=16)

@@ -44,6 +44,48 @@ class GaussianBasis:
         # Output from symbolic/gto_formulas.py compute_laplacian
         return self.norm_const * (x**l*y**(m + 2)*z**(n + 2)*(2*alpha*x**2*(2*alpha*x**2 - 2*l - 1) + l*(l - 1)) + x**(l + 2)*y**m*z**(n + 2)*(2*alpha*y**2*(2*alpha*y**2 - 2*m - 1) + m*(m - 1)) + x**(l + 2)*y**(m + 2)*z**n*(2*alpha*z**2*(2*alpha*z**2 - 2*n - 1) + n*(n - 1)))*np.exp(-alpha*(x**2 + y**2 + z**2))/(x**2*y**2*z**2)
 
+    def check_angular_compatibility(self, other_basis):
+        """
+        Check if two basis functions are compatible based on their angular momentum.
+        This ensures that integrals like ERI that involve angular components are non-zero.
+        """
+        L1 = sum(self.lmn)
+        L2 = sum(other_basis.lmn)
+        return L1 == L2
+
+
+    def check_1e_zero(self, other_basis):
+        """
+        Check if two basis functions are non-zero
+        """
+
+        diff = self.center - other_basis.center
+        same_center = np.sum(diff*diff) < 1e-10
+        if not same_center:
+            return False
+
+        l = sum(self.lmn)
+        ol = sum(other_basis.lmn)
+
+        return (l+ol) % 2 == 1
+
+    def check_2e_zero(self, b2, b3, b4):
+        """
+        Check if four basis functions are non-zero
+        """
+
+        blist = [self, b2, b3, b4]
+        for i in range(4):
+            for j in range(i):
+                diff1 = blist[i].center - blist[j].center
+                same_center = np.sum(diff1*diff1) < 1e-10
+                if not same_center:
+                    return False
+
+        ltot = sum(self.lmn) + sum(b2.lmn) + sum(b3.lmn) + sum(b4.lmn)
+        return ltot % 2 == 1
+
+
 
 class ContractedGaussian:
     """
@@ -63,4 +105,12 @@ class ContractedGaussian:
 
     def laplacian(self, r):
         return sum(c * g.laplacian(r) for c, g in zip(self.coeffs, self.components))
+
+    def check_1e_zero(self, other_basis):
+        # Assume the symmetry of each element in the contraction is the same
+        return self.components[0].check_1e_zero(other_basis.components[0])
+
+    def check_2e_zero(self, b2, b3, b4):
+        # Assume the symmetry of each element in the contraction is the same
+        return self.components[0].check_2e_zero(b2.components[0], b3.components[0], b4.components[0])
 
